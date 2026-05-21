@@ -37,32 +37,7 @@ Luego, la señal procesada se segmentó en intervalos de dos minutos, permitiend
 Finalmente, se obtuvieron los índices CVI y CSI a partir de la dispersión de los intervalos R-R, comparando los resultados entre ambas condiciones experimentales para identificar modificaciones en la regulación simpática y parasimpática.
 
 ---
-
-## Explicación del código
-
-En esta sección se explica el funcionamiento del código, en el cual se emplean herramientas de programación en Python para el procesamiento y análisis de señales electromiográficas (EMG). Se destaca la importancia del análisis espectral mediante la Transformada Rápida de Fourier (FFT) y métodos como Welch, así como la aplicación de filtros digitales pasa banda implementados con funciones de la librería scipy.signal. Adicionalmente, se utilizan librerías como NumPy, Pandas y Matplotlib para la manipulación de datos, el cálculo de parámetros relevantes en el dominio de la frecuencia y la visualización de la señal, permitiendo evaluar el comportamiento espectral y su relación con la fatiga muscular.
-
-### Importación de librerías
-
-Primero se importan las librerías necesarias para la lectura, procesamiento y análisis de las señales electromiográficas:
-
-* `numpy `: Se utiliza para el manejo de arreglos numéricos y la realización de operaciones matemáticas como promedios, sumas, aplicación de ventanas (Hamming) y cálculos espectrales.
-
-* `matplotlib.pyplot `: Se emplea para la generación de gráficas en el dominio del tiempo y de la frecuencia, permitiendo visualizar la señal EMG original, filtrada y sus espectros.
-
-* `pandas `: Permite la lectura y manipulación de archivos de datos, especialmente en formato `.txt `, facilitando la organización y extracción de la señal adquirida.
-
-* `scipy.fft (fft, fftfreq) `: Se utiliza para calcular la Transformada Rápida de Fourier (FFT) y obtener el espectro de frecuencias de la señal.
-
-* `scipy.signal (butter, filtfilt, welch) `:
-
-* `butter `:Se usa para diseñar filtros digitales tipo Butterworth, tanto pasa bajos como pasa banda, adecuados para el procesamiento de señales EMG.
-
-* `filtfilt `: Aplica el filtrado de forma bidireccional, evitando desfases en la señal.
-
-* `welch `: Permite estimar la densidad espectral de potencia (PSD), útil para el análisis comparativo del contenido frecuencial en diferentes segmentos de la señal.
-
-Estas herramientas son fundamentales para el procesamiento digital de señales electromiográficas, ya que permiten el acondicionamiento de la señal, su análisis en el dominio del tiempo y la frecuencia, y la extracción de características relevantes para evaluar la fatiga muscular.
+### Diagrama de flujo
 
 <p align="center">
 <img width="774" height="800" alt="image" src="https://github.com/user-attachments/assets/7ddebaf5-506e-45de-a269-b3f629e23daa" />
@@ -150,19 +125,40 @@ Por otro lado, una HRV baja sugiere una reducción en la capacidad del sistema n
 
 El análisis de la HRV permite entonces estimar indirectamente el estado del balance autonómico sin necesidad de ningún procedimiento invasivo. Dependiendo del método de análisis utilizado, es posible obtener información sobre la actividad vagal de forma aislada, sobre la actividad simpática, o sobre la interacción entre ambas. Esta es precisamente la razón por la que la HRV se ha consolidado como una herramienta valiosa tanto en la investigación fisiológica como en la evaluación clínica del sistema nervioso autónomo.
 
+### Adquisición de la señal ECG
+
+Una mujer de 19 años fue elegida como sujeto de prueba para llevar a cabo la adquisición de la señal electrocardiográfica. El registro tuvo una duración total de 4 minutos, estructurados en dos etapas: en la primera, correspondiente a los 2 minutos iniciales, la participante permaneció en reposo absoluto, sin hablar ni realizar ningún tipo de movimiento; en la segunda etapa, durante los 2 minutos finales, se le pidió leer en voz alta un fragmento de texto que el equipo había seleccionado previamente.
+Para la captura de la señal se empleó el dispositivo BITalino, al cual se conectaron los electrodos siguiendo una disposición determinada. El electrodo del cable blanco fue colocado en la zona subclavicular izquierda, el del cable negro en la zona subclavicular derecha y el del cable rojo sobre las costillas del lado derecho.
+
+<p align="center">
+<img width="1024" height="651" alt="image" src="https://github.com/user-attachments/assets/8b32745a-8fff-4704-9f4a-84c38872eceb" />
+</p>
+<p align="center">
+  <em>Colocación de electrodos</em></p
+
+La señal original se muestrea a 1000 Hz, es decir, 1000 muestras por segundo. Esta frecuencia de muestreo es adecuada para el análisis de ECG, ya que cumple con el teorema de Nyquist para la banda de interés del filtro utilizado (0.5–40 Hz), y permite una resolución temporal de 1 ms entre muestras.
+
+<p align="center">
+<img width="1905" height="512" alt="image" src="https://github.com/user-attachments/assets/bb60221e-a7aa-412c-8d0c-84dc0f2a73ee" />
+</p>
+<p align="center">
+  <em>Señal original</em></p
 
 ---
 
 ### Parte B
 
-Inicialmente, se implementó una función para la carga de la señal ECG desde un archivo de texto, descartando líneas vacías o comentarios y seleccionando el canal correspondiente a la señal cardíaca. Posteriormente, los datos fueron convertidos a milivoltios considerando el voltaje de referencia del sistema y la ganancia empleada durante la adquisición.
+Inicialmente, se implementó una función para la carga de la señal ECG desde un archivo de texto, 
+descartando líneas vacías o comentarios y seleccionando el canal correspondiente a la señal cardíaca. 
+Posteriormente, los datos fueron convertidos a milivoltios considerando el voltaje de referencia del 
+sistema y la ganancia empleada durante la adquisición.
 
-Luego, se diseñó un filtro digital Butterworth pasa-banda de cuarto orden con frecuencias de corte entre 0.5 Hz y 40 Hz, rango adecuado para señales electrocardiográficas. Este procedimiento permitió reducir componentes de ruido de baja y alta frecuencia, conservando las características principales del ECG. Adicionalmente, se obtuvo la ecuación en diferencias del filtro con el fin de representar matemáticamente su implementación discreta.
+## Filtrado de la señal
 
-Posteriormente, el filtrado fue aplicado mediante procesamiento digital de señales utilizando la función lfilter, obteniendo una señal ECG acondicionada para las etapas posteriores de análisis. Finalmente, se implementó un algoritmo de detección de picos R basado en criterios estadísticos de amplitud, prominencia y distancia mínima entre picos, permitiendo calcular los intervalos R-R y parámetros básicos asociados a la frecuencia cardíaca.
-
-El filtro se realizó mediante un filtro digital Butterworth pasa-banda de cuarto orden, diseñado para conservar únicamente las frecuencias características de la señal ECG entre 0.5 Hz y 40 Hz, eliminando componentes de ruido de baja y alta frecuencia.
-
+Se diseñó un filtro digital Butterworth pasa-banda de cuarto orden con frecuencias de corte entre 
+0.5 Hz y 40 Hz, rango adecuado para señales electrocardiográficas. Este procedimiento permitió 
+reducir componentes de ruido de baja y alta frecuencia, conservando las características principales 
+del ECG.
 
 ```python
 def disenar_filtro(fs, f_low=0.5, f_high=40.0, orden=4):
@@ -173,20 +169,34 @@ def disenar_filtro(fs, f_low=0.5, f_high=40.0, orden=4):
         btype='band'
     )
 ```
-La implementación del filtro se llevó a cabo utilizando la función butter() de la librería scipy.signal, la cual calcula los coeficientes del filtro digital en función de la frecuencia de muestreo y las frecuencias de corte establecidas.
+
+La implementación del filtro se llevó a cabo utilizando la función `butter()` de la librería 
+`scipy.signal`, la cual calcula los coeficientes del filtro digital en función de la frecuencia 
+de muestreo y las frecuencias de corte establecidas. Posteriormente, el filtrado fue aplicado 
+mediante la función `lfilter()`, obteniendo una señal ECG acondicionada para las etapas 
+posteriores de análisis.
+
+```python
+def filtrar(ecg_mv, b, a):
+    return signal.lfilter(b, a, ecg_mv)
+```
 
 <p align="center">
 <img width="1905" height="512" alt="image" src="https://github.com/user-attachments/assets/bb60221e-a7aa-412c-8d0c-84dc0f2a73ee" />
 </p>
-<p align="center">
-  <em>Señal original vs Señal filtrada</em></p
+<p align="center"><em>Señal original vs señal filtrada</em></p>
 
-La ecuación en diferencias se obtuvo a partir de los coeficientes del filtro digital Butterworth calculados mediante la función signal.butter(). Esta función entrega dos conjuntos de coeficientes:
+## Ecuación en diferencias
 
-- b: coeficientes asociados a las entradas de la señal x[n],
-- a: coeficientes asociados a las salidas anteriores y[n].
+La ecuación en diferencias se obtuvo a partir de los coeficientes del filtro digital Butterworth 
+calculados mediante la función `signal.butter()`. Esta función entrega dos conjuntos de coeficientes:
 
-Con estos coeficientes se construyó la representación matemática discreta del filtro, expresando cada muestra de salida como una combinación lineal de muestras actuales y anteriores de la señal de entrada y de la propia salida.
+- **b:** coeficientes asociados a las entradas de la señal x[n]
+- **a:** coeficientes asociados a las salidas anteriores y[n]
+
+Con estos coeficientes se construyó la representación matemática discreta del filtro, expresando 
+cada muestra de salida como una combinación lineal de muestras actuales y anteriores de la señal 
+de entrada y de la propia salida.
 
 ```python
 lhs = " + ".join(
@@ -202,7 +212,6 @@ rhs = " + ".join(
 )
 
 print(f"y[n] = {lhs}")
-
 if rhs:
     print(f"     - {rhs}")
 ```
@@ -210,183 +219,229 @@ if rhs:
 <p align="center">
 <img width="1765" height="96" alt="image" src="https://github.com/user-attachments/assets/d846b9fd-c9a0-43aa-97cd-36c891552e11" />
 </p>
+<p align="center"><em>Ecuación en diferencias</em></p>
+
+La ecuación en diferencias representa la implementación discreta del filtro digital IIR diseñado 
+para el acondicionamiento de la señal ECG. En esta expresión, cada muestra de salida depende tanto 
+de muestras actuales y pasadas de la señal de entrada como de salidas anteriores del sistema, 
+permitiendo modelar el comportamiento dinámico del filtro de manera recursiva.
+
+## Respuesta en frecuencia
+
 <p align="center">
-  <em>Ecuación de diferencias</em></p
+<img width="1484" height="717" alt="image" src="https://github.com/user-attachments/assets/1d5b5cef-5bd9-44d0-9df7-2351f29aaab2" />
+</p>
+<p align="center"><em>Respuesta en frecuencia del filtro pasa-banda</em></p>
 
-La ecuación en diferencias representa la implementación discreta del filtro digital IIR diseñado para el acondicionamiento de la señal ECG. En esta expresión, cada muestra de salida depende tanto de muestras actuales y pasadas de la señal de entrada como de salidas anteriores del sistema. Esto permite modelar el comportamiento dinámico del filtro y realizar el procesamiento digital de la señal de manera recursiva.
+Respuesta en frecuencia del filtro Butterworth pasa-banda de orden 4 aplicado a la señal ECG. 
+La línea discontinua roja indica la frecuencia de corte inferior (0.5 Hz) y la línea discontinua 
+azul indica la frecuencia de corte superior (40 Hz). La banda de paso comprendida entre ambas 
+frecuencias presenta una atenuación cercana a 0 dB, lo que indica que las componentes frecuenciales 
+de interés clínico del ECG se conservan sin distorsión significativa, mientras que las frecuencias 
+fuera de este rango son atenuadas progresivamente.
 
-Después del diseño del filtro Butterworth pasa-banda, este fue aplicado a la señal ECG utilizando parámetros iniciales iguales a cero mediante la función lfilter() de la librería scipy.signal. La implementación se realizó con el siguiente fragmento de código:
+## Segmentación de la señal
+
+La señal filtrada fue dividida en dos segmentos de dos minutos cada uno, correspondientes a las 
+condiciones de reposo y verbalización.
 
 ```python
-def filtrar(ecg_mv, b, a):
-    return signal.lfilter(b, a, ecg_mv)
+tiempo_limite = 2 * 60                    
+indice_2min   = int(tiempo_limite * FS)   
+
+seg1 = ecg_filt[:indice_2min]            # Segmento 1 — Reposo (0–2 min)
+seg2 = ecg_filt[indice_2min:]            # Segmento 2 — Lectura en voz alta (2–4 min)
 ```
-Posteriormente, la señal filtrada fue dividida en dos segmentos de dos minutos cada uno, correspondientes a las condiciones de reposo y verbalización.
+
+<p align="center">
+<img width="1908" height="929" alt="image" src="https://github.com/user-attachments/assets/58bfd394-0681-492c-a5a9-9c61efb443d7" />
+</p>
+<p align="center"><em>Segmento 1 y segmento 2</em></p>
+
+El segmento superior corresponde a los primeros 2 minutos de registro, durante los cuales la 
+participante permaneció en reposo completo y en silencio. El segmento inferior corresponde a los 
+2 minutos siguientes, durante los cuales la participante realizó lectura en voz alta. En ambos 
+segmentos se observa la morfología característica del ECG con los complejos QRS claramente 
+identificables a lo largo del tiempo.
+
+## Detección de picos R e intervalos R-R
+
+Para la detección de los picos R en cada segmento se utilizó la función `find_peaks()` de 
+`scipy.signal`, aplicando criterios de altura mínima, distancia mínima entre picos y prominencia 
+para garantizar que únicamente se detectaran los picos R y no otras ondas del complejo ECG.
 
 ```python
-seg1 = ecg_filtrada[:2*60*fs]
-seg2 = ecg_filtrada[2*60*fs:4*60*fs]
+def detectar_picos(seg, fs):
+    media          = np.mean(seg)
+    std            = np.std(seg)
+    rango          = seg.max() - seg.min()
+    height_min     = media + 1.5 * std
+    dist_min       = int(0.40 * fs)
+    prominence_min = 0.4 * rango
+
+    picos, _ = signal.find_peaks(
+        seg,
+        height     = height_min,
+        distance   = dist_min,
+        prominence = prominence_min
+    )
+    return picos
+
+picos1 = detectar_picos(seg1, fs)
+picos2 = detectar_picos(seg2, fs)
 ```
 
-La segmentación permitió analizar las variaciones de la frecuencia cardíaca bajo diferentes estados fisiológicos.
+<p align="center">
+<img width="1904" height="870" alt="image" src="https://github.com/user-attachments/assets/1069ac40-180d-480f-accf-01f69277e836" />
+</p>
+<p align="center"><em>Detección de picos R — Segmento 1</em></p>
+
+Detección de picos R sobre el segmento 1 de la señal ECG filtrada, correspondiente a los primeros 
+2 minutos de registro en condición de reposo. Los triángulos rojos indican la posición temporal de 
+cada pico R detectado. La distribución uniforme y regular de los picos refleja una frecuencia 
+cardíaca estable, característica del estado de reposo en el que predomina el tono parasimpático.
+
+<p align="center">
+<img width="1909" height="865" alt="image" src="https://github.com/user-attachments/assets/c7f6693e-8c23-4484-913b-dbd5252d1c73" />
+</p>
+<p align="center"><em>Detección de picos R — Segmento 2</em></p>
+
+Detección de picos R sobre el segmento 2 de la señal ECG filtrada, correspondiente a los 2 minutos 
+de registro en condición de lectura en voz alta. En comparación con el segmento 1, se observa una 
+mayor irregularidad en el espaciado entre picos, lo que sugiere una mayor variabilidad en los 
+intervalos R-R asociada al esfuerzo cognitivo y vocal que implica la verbalización, condición que 
+activa el sistema nervioso simpático y reduce el predominio vagal característico del reposo.
+
+A partir de los picos R detectados se calcularon los intervalos R-R de cada segmento, expresados 
+en milisegundos, mediante la diferencia entre muestras consecutivas escalada por la frecuencia 
+de muestreo.
+
+```python
+rr1 = np.diff(picos1) / fs * 1000   # Segmento 1 — Reposo [ms]
+rr2 = np.diff(picos2) / fs * 1000   # Segmento 2 — Lectura en voz alta [ms]
+```
 
 <p align="center">
 <img width="1809" height="907" alt="image" src="https://github.com/user-attachments/assets/a7c2bd65-de47-4c80-9632-7a49bc880ca5" />
 </p>
-<p align="center">
-  <em>Intervalos R-R</em></p
+<p align="center"><em>Intervalos R-R</em></p>
 
-La frecuencia media inicia alrededor de valores cercanos a 120–125 Hz y presenta una disminución progresiva hasta valores próximos a 115 Hz. Esta tendencia se confirma con la pendiente negativa de la regresión lineal (-0.06 Hz/s), lo que indica una reducción gradual del contenido frecuencial de la señal.
-
-Por su parte, la frecuencia mediana presenta una disminución más pronunciada, pasando aproximadamente de 90 Hz a valores cercanos a 80 Hz. La pendiente de la regresión (-0.11 Hz/s) es más negativa que la de la frecuencia media, lo que sugiere que este parámetro es más sensible a los cambios asociados a la fatiga.
-
-Además de la tendencia general, se observan fluctuaciones locales en ambas curvas, las cuales pueden atribuirse a variaciones en la activación de las unidades motoras durante la contracción. Sin embargo, estas variaciones no afectan la tendencia global descendente.
-
-Desde el punto de vista fisiológico, este comportamiento se relaciona con la disminución en la velocidad de conducción de las fibras musculares y la fatiga progresiva de las unidades motoras. Como consecuencia, el contenido espectral de la señal se desplaza hacia frecuencias más bajas, lo cual se refleja directamente en la disminución de la frecuencia media y mediana.
-
-En conjunto, estos resultados evidencian que el análisis espectral de la señal EMG permite identificar de manera efectiva la aparición de fatiga muscular durante contracciones sostenidas.
-
-Adicionalmente, se realizó un ajuste mediante regresión lineal sobre estos parámetros, con el fin de identificar tendencias en su comportamiento. La pendiente obtenida proporciona una medida cuantitativa del cambio en el contenido frecuencial de la señal.
-
-Para complementar el análisis, se seleccionaron tres segmentos representativos de la señal (inicio, mitad y final), sobre los cuales se calculó la FFT. Esto permitió comparar directamente el contenido espectral en diferentes momentos de la contracción.
-
-```python
-X_seg = np.abs(fft(xi))
-```
-<p align="center">
-<img width="1297" height="621" alt="image" src="https://github.com/user-attachments/assets/0a66fea1-e741-46e0-b7de-52e7cea56a1f" />
-</p>
-<p align="center">
-  <em>Transformada de fourier en segmento</em></p
- 
-Se identificó la frecuencia pico en cada uno de estos segmentos, evidenciando un desplazamiento hacia frecuencias más bajas a medida que avanza la contracción. Este comportamiento es característico de la fatiga muscular y refleja cambios en la activación de las fibras musculares.
-
-
-#### Análisis de los resultados
-
-Los resultados obtenidos a partir del análisis espectral de la señal electromiográfica evidencian una variación progresiva en los parámetros de frecuencia media y frecuencia mediana a lo largo del tiempo. Esta variación se manifiesta principalmente como una tendencia decreciente, lo que indica un desplazamiento del contenido espectral hacia frecuencias más bajas.
-
-Este comportamiento puede explicarse por diferentes factores asociados a la fisiología de la fatiga muscular:
-
-- Disminución en la velocidad de conducción de las fibras musculares.
-- Fatiga progresiva de las unidades motoras durante la contracción sostenida.
-- Cambios en el reclutamiento y sincronización de las fibras musculares.
-- Acumulación de metabolitos como el lactato, que afectan la eficiencia del músculo.
-
-Además, se observaron fluctuaciones en los valores de frecuencia a lo largo del tiempo, las cuales pueden atribuirse a:
-
-- Variabilidad natural en la activación muscular.
-- Presencia de ruido en la señal, incluso después del filtrado.
-- Movimiento o leve variación en la posición de los electrodos.
-- Limitaciones propias del proceso de segmentación de la señal.
-
-Es importante considerar que el cálculo de la frecuencia media y mediana depende de la calidad del espectro obtenido. Factores como la longitud de las ventanas, el solapamiento y el filtrado aplicado pueden influir en la precisión de estos parámetros.
-
-En conjunto, los resultados muestran que el análisis en el dominio de la frecuencia es una herramienta útil para identificar la fatiga muscular, permitiendo observar de manera objetiva la disminución del contenido de altas frecuencias en la señal EMG durante contracciones sostenidas.
+La segmentación y el análisis de los intervalos R-R permitieron estudiar las variaciones de la 
+frecuencia cardíaca bajo diferentes estados fisiológicos, estableciendo la base para el análisis 
+de la HRV en el dominio del tiempo y el diagrama de Poincaré.
 
 ---
 
 ### Parte C 
-En esta sección se realizó un análisis espectral detallado de la señal electromiográfica (EMG) mediante la aplicación de la Transformada Rápida de Fourier (FFT), con el objetivo de observar cómo varía el contenido frecuencial a lo largo de una contracción muscular sostenida.
 
-Se seleccionaron segmentos representativos de la señal correspondientes al inicio, la mitad y el final de la contracción. A cada uno de estos segmentos se le aplicó una ventana de Hamming para reducir efectos de fuga espectral y mejorar la estimación del contenido en frecuencia.
+#### Análisis de la HRV en el dominio del tiempo
 
-```python
-xi = xi * np.hamming(N_seg)
-X_seg = np.abs(fft(xi))
-```
-
-Para cada segmento se calculó el espectro de magnitud considerando únicamente el rango de frecuencias entre 20 y 450 Hz, correspondiente a la actividad muscular. Estos espectros fueron representados en escala logarítmica, lo que permitió una mejor visualización de las diferencias en la distribución de energía.
-
-La comparación entre los espectros mostró una disminución progresiva del contenido de altas frecuencias a medida que avanza la contracción. En el segmento inicial se observa una mayor presencia de componentes de alta frecuencia, mientras que en el segmento final estas componentes se reducen notablemente.
-
-Adicionalmente, se identificó la frecuencia pico en cada segmento, evidenciando un desplazamiento hacia valores más bajos con el paso del tiempo. Este comportamiento es consistente con la aparición de fatiga muscular.
+Para el análisis de la variabilidad de la frecuencia cardíaca en el dominio del tiempo se 
+calcularon los parámetros estadísticos básicos de la serie R-R para cada segmento: la media, 
+la desviación estándar (SDNN), la raíz cuadrada de la media de las diferencias al cuadrado 
+(RMSSD), el porcentaje de intervalos consecutivos que difieren más de 50 ms (pNN50) y el 
+coeficiente de variación (CV).
 
 ```python
-f_pico = freqs_s[np.argmax(X_seg)]
-```
-Estos resultados reflejan cambios fisiológicos en el músculo, como la disminución en la velocidad de conducción de las fibras musculares y la fatiga de las unidades motoras, lo cual provoca una redistribución del contenido espectral hacia frecuencias más bajas.
+def hrv_dominio_tiempo(rr1, rr2):
+    def calcular(rr, nombre):
+        media  = np.mean(rr)
+        sdnn   = np.std(rr, ddof=1)
+        rmssd  = np.sqrt(np.mean(np.diff(rr)**2))
+        pnn50  = np.sum(np.abs(np.diff(rr)) > 50) / len(np.diff(rr)) * 100
+        cv     = sdnn / media * 100
+        return {'nombre': nombre, 'media': media, 'sdnn': sdnn,
+                'rmssd': rmssd, 'pnn50': pnn50, 'cv': cv}
 
-En conjunto, el análisis mediante FFT confirma que el estudio en el dominio de la frecuencia es una herramienta eficaz para detectar y caracterizar la fatiga muscular en señales electromiográficas.
+    p1 = calcular(rr1, "Segmento 1 (0–2 min)")
+    p2 = calcular(rr2, "Segmento 2 (2–4 min)")
+    return p1, p2
+```
 
 <p align="center">
-<img width="889" height="650" alt="image" src="https://github.com/user-attachments/assets/152a0590-d05f-4898-8665-7e8b1db76e07" />
+<img width="1658" height="642" alt="image" src="https://github.com/user-attachments/assets/78cde75e-1ac8-4ff8-864e-13a057b7e629" />
+
 </p>
+<p align="center"><em>Comparación HRV dominio del tiempo entre ambos segmentos</em></p>
+
+La media del intervalo R-R fue de 682.7 ms en el segmento 1 y de 647.3 ms en el segmento 2, 
+lo que indica un aumento de la frecuencia cardíaca durante la lectura en voz alta. La SDNN 
+fue ligeramente mayor en el segmento 2 (39.6 ms) respecto al segmento 1 (35.2 ms), mientras 
+que el RMSSD fue mayor en el segmento 1 (27.8 ms) frente al segmento 2 (25.4 ms), lo que 
+sugiere una mayor actividad vagal en condición de reposo. El pNN50 también fue mayor en el 
+segmento 1 (6.4%) que en el segmento 2 (4.9%), reforzando esta tendencia. El CV fue de 5.2% 
+en reposo y de 6.1% en lectura, reflejando una ligera mayor variabilidad relativa durante 
+la verbalización.
+
+## Diagrama de Poincaré
+
+El diagrama de Poincaré se construyó representando cada intervalo R-R en función del intervalo 
+siguiente, generando una nube de puntos cuya forma elipsoide permite estimar de manera 
+independiente la actividad simpática y parasimpática del sistema nervioso autónomo. A partir 
+de los ejes de la elipse se calcularon los índices CVI y CSI propuestos por Toichi et al. (1997).
+
+```python
+def poincare_indices(rr_ms, nombre="Seg"):
+    rr_n  = rr_ms[:-1]
+    rr_n1 = rr_ms[1:]
+    x_rot = (rr_n + rr_n1) / np.sqrt(2)   # Eje longitudinal
+    y_rot = (rr_n - rr_n1) / np.sqrt(2)   # Eje transversal
+
+    L = 4 * np.std(x_rot, ddof=1)          # Longitud eje longitudinal
+    T = 4 * np.std(y_rot, ddof=1)          # Longitud eje transversal
+
+    CVI = np.log10(L * T)                  # Índice vagal cardíaco
+    CSI = L / T                            # Índice simpático cardíaco
+```
+
 <p align="center">
-  <em>Desplazamiento del pico espectral</em></p
-                                              
-La gráfica muestra la variación de la frecuencia pico de la señal electromiográfica en tres momentos representativos de la contracción muscular: inicio, mitad y final. Se observa una disminución marcada desde aproximadamente 83.7 Hz al inicio hasta valores cercanos a 47 Hz en la mitad y el final de la contracción.
+<img width="1810" height="770" alt="image" src="https://github.com/user-attachments/assets/5440e4d2-ab7d-47a6-b9ad-33c04a851ee3" />
+</p>
+<p align="center"><em>Diagrama de Poincaré — Segmento 1 y Segmento 2</em></p>
 
-Este comportamiento evidencia un desplazamiento significativo del contenido espectral hacia frecuencias más bajas, especialmente en la primera mitad del esfuerzo. La caída abrupta entre el inicio y la mitad sugiere que el proceso de fatiga muscular comienza de forma temprana durante la contracción sostenida.
+En el segmento 1 (reposo) se obtuvo L = 183.1 ms y T = 79.0 ms, con un CVI de 4.160 y un 
+CSI de 2.318. En el segmento 2 (lectura en voz alta) se obtuvo L = 212.0 ms y T = 72.2 ms, 
+con un CVI de 4.185 y un CSI de 2.937. La elipse del segmento 2 es más larga y estrecha que 
+la del segmento 1, lo que visualmente confirma el incremento del tono simpático durante la 
+verbalización. Cada punto del diagrama corresponde al par (RR[n], RR[n+1]) y la línea 
+punteada representa la línea identidad donde RR[n] = RR[n+1].
 
-Entre la mitad y el final, la frecuencia pico se mantiene relativamente estable (47.3 Hz a 47.0 Hz), lo que indica que el músculo ya se encuentra en un estado de fatiga más avanzado, donde los cambios en la actividad eléctrica son menos pronunciados.
+## Comparación CVI y CSI entre segmentos
 
-Desde el punto de vista fisiológico, este fenómeno se asocia con:
+<p align="center">
+<img width="1286" height="634" alt="image" src="https://github.com/user-attachments/assets/8007215f-ebcd-4095-8bd9-07ce2390a12e" />
+</p>
+<p align="center"><em>Comparación CVI y CSI entre segmentos (Toichi et al., 1997)</em></p>
 
-- La disminución en la velocidad de conducción de las fibras musculares.
-- La fatiga de las unidades motoras activas.
-- Una mayor sincronización de las fibras, lo que favorece componentes de menor frecuencia.
-
-En conjunto, la gráfica confirma que la frecuencia pico es un indicador sensible de la fatiga muscular, mostrando una reducción clara a medida que progresa la contracción. Además, complementa los resultados obtenidos con la frecuencia media y mediana, reforzando la evidencia del desplazamiento espectral hacia bajas frecuencias.
-
----
-### Preguntas para la discusión
-
-#### 1. ¿Cambian los valores de frecuencia media y mediana a medida que el músculo se acerca a la fatiga? ¿A qué podría atribuirse este cambio?
-
-Sí, los valores de frecuencia media y frecuencia mediana presentan una disminución progresiva a medida que el músculo se acerca a la fatiga. Este comportamiento se evidencia en las gráficas obtenidas, donde ambas frecuencias muestran una tendencia descendente a lo largo del tiempo.
-
-Este cambio se atribuye principalmente a factores fisiológicos asociados al proceso de fatiga muscular, entre los que se destacan:
-
-- La disminución en la velocidad de conducción de las fibras musculares.
-- La fatiga de las unidades motoras, que reduce su capacidad de activación eficiente.
-- La acumulación de metabolitos (como el lactato), que afecta el funcionamiento del músculo.
-- Cambios en el reclutamiento y sincronización de las fibras musculares.
-
-Como consecuencia, el contenido espectral de la señal electromiográfica se desplaza hacia frecuencias más bajas, lo que se refleja directamente en la reducción de la frecuencia media y mediana.
-
-
----
-
-#### 2. ¿Cómo justifica el uso de herramientas como la transformada de Fourier en escenarios como, por ejemplo, terapias de rehabilitación?
-
-El uso de herramientas como la Transformada de Fourier se justifica porque permite analizar la señal en el dominio de la frecuencia, proporcionando información que no es fácilmente observable en el dominio del tiempo.
-
-En el contexto de terapias de rehabilitación, este tipo de análisis resulta especialmente útil, ya que permite detectar la fatiga muscular de forma objetiva mediante el estudio de cambios en las frecuencias de la señal. Asimismo, facilita el seguimiento del progreso del paciente al evaluar cómo varía la respuesta muscular a lo largo del tiempo.
-
-De igual manera, este análisis contribuye a ajustar la intensidad y duración de los ejercicios, evitando sobrecargas o posibles lesiones. Además, brinda información sobre la activación muscular, lo que resulta útil para diseñar programas de rehabilitación más personalizados y eficientes.
-
-En este sentido, la Transformada de Fourier se convierte en una herramienta clave dentro del procesamiento de señales biomédicas, ya que permite extraer características relevantes que apoyan la toma de decisiones clínicas.
+El índice vagal cardíaco (CVI = log₁₀(L × T)) presentó valores similares entre ambos 
+segmentos: 4.160 en reposo y 4.185 en lectura en voz alta, lo que indica que la actividad 
+parasimpática no tuvo una variación significativa entre condiciones. Por otro lado, el índice 
+simpático cardíaco (CSI = L/T) mostró un incremento notable, pasando de 2.318 en el segmento 
+1 a 2.937 en el segmento 2, lo que evidencia una mayor activación del sistema nervioso 
+simpático durante la verbalización. Estos resultados son consistentes con lo esperado 
+fisiológicamente, ya que la lectura en voz alta representa una tarea que demanda mayor 
+esfuerzo cognitivo y motor, favoreciendo el predominio simpático sobre el parasimpático.
 
 ---
 
 ## Discusión y analisis de resultados
 
-El análisis de la señal electromiográfica permitió evidenciar cambios significativos tanto en el dominio del tiempo como en el dominio de la frecuencia durante una contracción muscular sostenida hasta la fatiga. En el dominio temporal se observaron variaciones en la amplitud de la señal asociadas a la actividad muscular, mientras que en el dominio frecuencial se identificaron transformaciones relevantes en la distribución de energía.
+En el dominio del tiempo, la media del intervalo R-R disminuyó de 682.7 ms en el segmento 1 a 647.3 ms en el segmento 2, lo que corresponde a un aumento de la frecuencia cardíaca durante la verbalización. Esta reducción es consistente con una mayor activación simpática, ya que el sistema nervioso simpático acelera el corazón al liberar norepinefrina sobre los receptores β1-adrenérgicos del nodo sinoauricular. Por otro lado, el RMSSD y el pNN50, parámetros que reflejan predominantemente la actividad vagal de corto plazo, fueron mayores en el segmento de reposo (27.8 ms y 6.4% respectivamente) que en el segmento de lectura (25.4 ms y 4.9%), lo que indica una mayor influencia parasimpática durante el reposo. La SDNN fue ligeramente mayor en el segmento 2 (39.6 ms frente a 35.2 ms), lo que podría explicarse por la mayor variabilidad global introducida por el esfuerzo respiratorio y vocal durante la lectura.
 
-Los resultados obtenidos a partir del cálculo de la frecuencia media y la frecuencia mediana muestran una tendencia decreciente a lo largo del tiempo. Esta disminución indica un desplazamiento progresivo del contenido espectral hacia frecuencias más bajas, lo cual es un comportamiento característico de la fatiga muscular. La pendiente negativa observada en ambas curvas confirma esta tendencia, siendo más pronunciada en la frecuencia mediana, lo que sugiere una mayor sensibilidad de este parámetro frente a los cambios fisiológicos del músculo.
+En el análisis no lineal mediante el diagrama de Poincaré, el segmento 1 presentó una elipse con L = 183.1 ms y T = 79.0 ms, mientras que en el segmento 2 los valores fueron L = 212.0 ms y T = 72.2 ms. El alargamiento del eje longitudinal y la reducción del eje transversal en el segmento 2 generan una elipse más estrecha y elongada, lo que es característico de un mayor predominio simpático. Esto se confirma con el índice simpático cardíaco (CSI), que aumentó de 2.318 en reposo a 2.937 durante la lectura, representando un incremento del 26.7%. El índice vagal cardíaco (CVI), en cambio, se mantuvo prácticamente constante entre ambas condiciones (4.160 vs 4.185), lo que sugiere que la actividad parasimpática no experimentó cambios significativos y que el desplazamiento del balance autonómico hacia el sistema simpático durante la verbalización se produjo principalmente por una activación adicional de este último, más que por una inhibición del tono vagal.
 
-El análisis por segmentos refuerza este comportamiento. Al comparar el espectro en diferentes momentos de la contracción (inicio, mitad y final), se evidencia una reducción del contenido de altas frecuencias y un cambio en la distribución espectral hacia componentes de menor frecuencia. Este fenómeno se confirma mediante el desplazamiento de la frecuencia pico, que presenta una disminución considerable desde el inicio hasta la mitad del ejercicio, estabilizándose posteriormente en valores más bajos. Esto sugiere que la fatiga comienza a manifestarse de manera temprana durante la contracción sostenida.
+En conjunto, los resultados del dominio del tiempo y el diagrama de Poincaré son coherentes entre sí y con lo esperado fisiológicamente: la lectura en voz alta, al implicar esfuerzo cognitivo, control respiratorio y actividad motora vocal, activa el sistema nervioso simpático y produce un desplazamiento del balance autonómico respecto al estado de reposo.
 
-Desde el punto de vista fisiológico, estos resultados pueden explicarse por la disminución en la velocidad de conducción de las fibras musculares, la fatiga progresiva de las unidades motoras y la acumulación de metabolitos que afectan el desempeño muscular. Estos factores provocan una modificación en la señal EMG, reflejada en la pérdida de componentes de alta frecuencia.
-
-A pesar de la tendencia general observada, también se presentan fluctuaciones en los valores de frecuencia, las cuales pueden atribuirse a variaciones en la activación muscular, presencia de ruido en la señal, pequeñas alteraciones en la posición de los electrodos y limitaciones propias del proceso de segmentación y análisis.
-
-El uso de herramientas como la Transformada de Fourier se justifica porque permite analizar la señal en el dominio de la frecuencia, proporcionando información que no es fácilmente observable en el dominio del tiempo. En el contexto de terapias de rehabilitación, este tipo de análisis resulta especialmente útil, ya que permite detectar la fatiga muscular de forma objetiva mediante el estudio de cambios en las frecuencias de la señal. Asimismo, facilita el seguimiento del progreso del paciente al evaluar cómo varía la respuesta muscular a lo largo del tiempo.
-
-De igual manera, este análisis contribuye a ajustar la intensidad y duración de los ejercicios, evitando sobrecargas o posibles lesiones. Además, brinda información sobre la activación muscular, lo que resulta útil para diseñar programas de rehabilitación más personalizados y eficientes. En este sentido, la Transformada de Fourier se convierte en una herramienta clave dentro del procesamiento de señales biomédicas, ya que permite extraer características relevantes que apoyan la toma de decisiones clínicas.
-
-En conjunto, los resultados obtenidos demuestran que el análisis espectral de señales EMG es una herramienta eficaz para la identificación y caracterización de la fatiga muscular, integrando de manera coherente los hallazgos observados en las diferentes representaciones y parámetros analizados.
 
 ---
 
 ## Conclusiones
 
-- El análisis de la señal electromiográfica permitió evidenciar de manera clara la presencia de fatiga muscular durante una contracción sostenida, manifestada a través de la disminución progresiva de la frecuencia media y la frecuencia mediana.
+La práctica permitió identificar y cuantificar cambios en el balance autonómico cardíaco a partir del análisis de la variabilidad de la frecuencia cardíaca obtenida de una señal ECG real adquirida con el dispositivo BITalino. El procesamiento digital de la señal, mediante el diseño e implementación de un filtro Butterworth pasa-banda de cuarto orden con frecuencias de corte entre 0.5 Hz y 40 Hz, permitió acondicionar adecuadamente la señal para la detección de los picos R y el cálculo de los intervalos R-R.
 
-- El desplazamiento del contenido espectral hacia frecuencias más bajas, así como la reducción de la frecuencia pico, confirman que los parámetros en el dominio de la frecuencia son indicadores sensibles y confiables de la fatiga muscular.
+El análisis en el dominio del tiempo evidenció una reducción de la media del intervalo R-R y de los parámetros asociados a la actividad vagal (RMSSD y pNN50) durante la condición de lectura en voz alta, en comparación con el reposo. Estos hallazgos son consistentes con una mayor activación simpática durante la verbalización.
 
-- La Transformada de Fourier demostró ser una herramienta fundamental para el análisis de señales biomédicas, al permitir identificar características que no son evidentes en el dominio del tiempo.
+El diagrama de Poincaré y los índices derivados de Toichi et al. (1997) confirmaron estos resultados de manera independiente: el CSI aumentó considerablemente en el segmento de lectura, reflejando mayor actividad simpática, mientras que el CVI se mantuvo estable entre ambas condiciones, indicando que el tono parasimpático no varió de forma significativa. La capacidad del diagrama de Poincaré para separar la contribución simpática y parasimpática en una sola medición, sin necesidad de respiración controlada ni registros prolongados, representa una ventaja importante frente a otros métodos de análisis de HRV.
 
-- Los resultados obtenidos resaltan la utilidad del análisis espectral en aplicaciones clínicas, especialmente en el monitoreo de la actividad muscular y el diseño de estrategias de rehabilitación más precisas y seguras.
+Finalmente, los resultados obtenidos validan el uso del análisis de HRV como herramienta no invasiva para la evaluación del balance autonómico en diferentes condiciones fisiológicas, y respaldan la utilidad clínica y experimental del diagrama de Poincaré como método confiable y de fácil interpretación para este propósito.
 
