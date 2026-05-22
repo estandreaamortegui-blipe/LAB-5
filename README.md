@@ -40,7 +40,7 @@ Finalmente, se obtuvieron los índices CVI y CSI a partir de la dispersión de l
 ### Diagrama de flujo
 
 <p align="center">
-<img width="774" height="800" alt="image" src="https://github.com/user-attachments/assets/7ddebaf5-506e-45de-a269-b3f629e23daa" />
+<img width="554" height="910" alt="image" src="https://github.com/user-attachments/assets/67e33018-ecd7-48f2-84da-718386f0ce58" />
 </p>
 <p align="center">
   <em>Diagrama de flujo del codigo</em></p
@@ -143,6 +143,16 @@ La señal original se muestrea a 1000 Hz, es decir, 1000 muestras por segundo. E
 </p>
 <p align="center">
   <em>Señal original</em></p
+
+---
+### Plan de acción
+---
+
+<p align="center">
+<img width="700" height="1200" alt="image" src="https://github.com/user-attachments/assets/0b935ea2-8231-4d88-becd-8d81b001516f" />
+
+<p align="center">
+  <em>Plan de acción</em></p
 
 ---
 
